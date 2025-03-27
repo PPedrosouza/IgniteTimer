@@ -12,6 +12,7 @@ import {
     MinutesAmountInput,
     StartCountDownButton
 } from './styles'
+import { useState } from 'react'
 
 // schema pq é um formato de validação das bibliotecas de schema based 
 const newCycleFormValidationSchema = zod.object({
@@ -30,7 +31,16 @@ const newCycleFormValidationSchema = zod.object({
 // como não é possível referenciar a minha variável js dentro do ts, eu passo o tipo (typeof)
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+interface Cycle {
+    id: string;
+    task: string;
+    minutesAmount: number
+}
+
 export function Home() {
+    const [cycles, setCycles] = useState<Cycle[]>([]);
+    const [activeCycleId, setaAtiveCycleId] = useState<string | null>(null);
+
     const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
         resolver: zodResolver(newCycleFormValidationSchema),
         defaultValues: {
@@ -40,10 +50,23 @@ export function Home() {
     })
 
     function handleCreateNewCycle(data: NewCycleFormData) {
-        console.log(data);
-        reset();
+        const id = String(new Date().getTime())
 
+        const newCycle: Cycle = {
+            id: id,
+            task: data.task,
+            minutesAmount: data.minutesAmount
+        }
+
+        // adiciona todos os ciclos anteriores e dps o novo por meio de uma arrow function
+        setCycles((state) => [...cycles, newCycle])
+        setaAtiveCycleId(id)
+        
+        reset();
     }
+
+    const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+    console.log(activeCycle)
 
     const task = watch('task')
     const isSubmitDisable = !task
