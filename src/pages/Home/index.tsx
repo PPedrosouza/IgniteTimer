@@ -1,22 +1,21 @@
-import { HandPalm, Play } from 'phosphor-react'
+import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useState } from 'react'
+import { differenceInSeconds } from 'date-fns'
 import * as zod from 'zod'
-import { differenceInSeconds, interval } from 'date-fns'
 
 import {
-    CountDownContainer,
+    CountdownContainer,
     FormContainer,
     HomeContainer,
     Separator,
     TaskInput,
     MinutesAmountInput,
-    StartCountDownButton,
-    StopCountDownButton
+    StartCountDownButton
 } from './styles'
-import { useEffect, useState } from 'react'
 
-// schema pq é um formato de validação das bibliotecas de schema based 
+// schema because it is a validation format for schema-based libraries 
 const newCycleFormValidationSchema = zod.object({
     task: zod.string().min(1, 'Informe a tarefa'),
     minutesAmount: zod.number()
@@ -24,13 +23,13 @@ const newCycleFormValidationSchema = zod.object({
         .max(60, 'O ciclo precisa ser de no máximo 60 minutos')
 })
 
-// interface não é mais necessário porque acima já assume o tipo primitivo dos inputs
+// interface is no longer necessary because above it already assumes the primitive type of the inputs
 // interface NewCycleFormData {
 //     task: string,
 //     minutesAmount: number,
 // }
 
-// como não é possível referenciar a minha variável js dentro do ts, eu passo o tipo (typeof)
+//  since it's not possible to reference my js variable inside the ts, I pass the type (typeof)
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 interface Cycle {
@@ -38,7 +37,6 @@ interface Cycle {
     task: string;
     minutesAmount: number,
     startDate: Date
-    interruptedDate?: Date
 }
 
 export function Home() {
@@ -57,16 +55,12 @@ export function Home() {
     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
     useEffect(() => {
-        let interval: number;
-
         if (activeCycle) {
-            interval = setInterval(() => {
-                setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate))
+            setInterval(() => {
+                setAmountSecondsPassed(
+                    differenceInSeconds(new Date(), activeCycle.startDate),
+                )
             }, 1000)
-        }
-
-        return () => {
-            clearInterval(interval)
         }
     }, [activeCycle])
 
@@ -80,47 +74,25 @@ export function Home() {
             startDate: new Date()
         }
 
-        // adiciona todos os ciclos anteriores e dps o novo por meio de uma arrow function
-        setCycles(() => [...cycles, newCycle])
+        // adds all previous cycles and then the new one via an arrow function
+        setCycles((state) => [...cycles, newCycle])
         setaAtiveCycleId(id)
-        setAmountSecondsPassed(0)
 
         reset();
-    }
-
-    function handleInterruptCycle() {
-        setCycles(cycles.map((cycle) => {
-            if (cycle.id == activeCycleId) {
-                return { ...cycle, interruptedDate: new Date() }
-            } else {
-                return cycle
-            }
-        }),
-        )
-
-        setaAtiveCycleId(null)
     }
 
     const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
     const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
-    const minutesAmount = Math.floor(totalSeconds / 60)
+    const minutesAmount = Math.floor(currentSeconds / 60)
     const secondsAmount = currentSeconds % 60
-
+  
     const minutes = String(minutesAmount).padStart(2, '0')
     const seconds = String(secondsAmount).padStart(2, '0')
-
-    useEffect(() => {
-        if (activeCycle) {
-            document.title = `${minutes}:${seconds}`
-        }
-    }, [minutes, seconds, activeCycle])
 
     const task = watch('task')
     const isSubmitDisable = !task
 
-    console.log(cycles);
-    
     return (
         <HomeContainer>
             <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
@@ -130,7 +102,6 @@ export function Home() {
                         id="task"
                         list='task-suggestion'
                         placeholder="Dê um nome para o seu projeto"
-                        disabled={!!activeCycle}
                         {...register('task')}
                     />
 
@@ -149,33 +120,24 @@ export function Home() {
                         step={5}
                         min={5}
                         max={60}
-                        disabled={!!activeCycle}
                         {...register('minutesAmount', { valueAsNumber: true })}
                     />
 
                     <span>minutos.</span>
                 </FormContainer>
 
-                <CountDownContainer>
+                <CountdownContainer>
                     <span>{minutes[0]}</span>
                     <span>{minutes[1]}</span>
                     <Separator>:</Separator>
                     <span>{seconds[0]}</span>
                     <span>{seconds[1]}</span>
-                </CountDownContainer>
+                </CountdownContainer>
 
-                {activeCycle ? (
-                    <StopCountDownButton onClick={handleInterruptCycle} type="button">
-                        <HandPalm size={24} />
-                        Interromper
-                    </StopCountDownButton>
-                ) : (
-                    <StartCountDownButton type="submit" disabled={isSubmitDisable}>
-                        <Play size={24} />
-                        Começar
-                    </StartCountDownButton>
-                )
-                }
+                <StartCountDownButton type="submit" disabled={isSubmitDisable}>
+                    <Play size={24} />
+                    Começar
+                </StartCountDownButton>
             </form>
         </HomeContainer>
     )
