@@ -12,7 +12,8 @@ import {
     Separator,
     TaskInput,
     MinutesAmountInput,
-    StartCountDownButton
+    StartCountdownButton,
+    StopCountdownButton
 } from './styles'
 
 // schema because it is a validation format for schema-based libraries 
@@ -36,7 +37,8 @@ interface Cycle {
     id: string;
     task: string;
     minutesAmount: number,
-    startDate: Date
+    startDate: Date,
+    interruptedDate?: Date,
 }
 
 export function Home() {
@@ -88,6 +90,19 @@ export function Home() {
         reset();
     }
 
+    function handleInterruptCycle() {        
+        setCycles(
+            cycles.map((cycle) => {
+                if(cycle.id == activeCycleId){
+                    return {...cycle, interruptedDate: new Date()}
+                } else {
+                    return cycle
+                }
+            }),
+        )
+        setaAtiveCycleId(null)
+    }
+
     const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
     const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
@@ -115,6 +130,7 @@ export function Home() {
                         id="task"
                         list='task-suggestion'
                         placeholder="Dê um nome para o seu projeto"
+                        disabled={!!activeCycle}
                         {...register('task')}
                     />
 
@@ -130,6 +146,7 @@ export function Home() {
                         type="number"
                         id="minutesAmount"
                         placeholder="00"
+                        disabled={!!activeCycle}
                         step={5}
                         min={5}
                         max={60}
@@ -147,10 +164,17 @@ export function Home() {
                     <span>{seconds[1]}</span>
                 </CountdownContainer>
 
-                <StartCountDownButton type="submit" disabled={isSubmitDisable}>
-                    <Play size={24} />
-                    Começar
-                </StartCountDownButton>
+                {activeCycle ? (
+                    <StopCountdownButton onClick={handleInterruptCycle} type="button">
+                        <Play size={24} />
+                        Interromper
+                    </StopCountdownButton>
+                ) : (
+                    <StartCountdownButton type="submit" disabled={isSubmitDisable}>
+                        <Play size={24} />
+                        Começar
+                    </StartCountdownButton>
+                )}
             </form>
         </HomeContainer>
     )

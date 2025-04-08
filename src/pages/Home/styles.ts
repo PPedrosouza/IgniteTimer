@@ -106,11 +106,9 @@ export const BaseCountDownButton = styled.button`
     opacity: 0.7;
     cursor: not-allowed;
   }
-
-  
 `
 
-export const StartCountDownButton = styled(BaseCountDownButton)`
+export const StartCountdownButton = styled(BaseCountDownButton)`
   background: ${(props) => props.theme['green-500']};
 
   &:not(:disabled):hover {
@@ -118,10 +116,10 @@ export const StartCountDownButton = styled(BaseCountDownButton)`
   }
 `;
 
-export const StopCountDownButton = styled(BaseCountDownButton)`
+export const StopCountdownButton = styled(BaseCountDownButton)`
   background: ${(props) => props.theme['red-500']};
 
   &:not(:disabled):hover {
     background: ${(props) => props.theme['red-700']};
   }
-`;
+`
