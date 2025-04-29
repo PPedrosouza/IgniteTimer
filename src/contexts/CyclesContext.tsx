@@ -36,6 +36,11 @@ interface CyclesState {
     activeCycleId: string | null
 }
 
+interface CyclesState {
+    cycles: Cycle[]
+    activeCycleId: string | null
+}
+
 export function CyclesContextProvider({ children }: CyclesContexProviderProps) {
     const [cyclesState, dispatch] = useReducer((state: CyclesState, action: any) => {
         switch (action.type) {
