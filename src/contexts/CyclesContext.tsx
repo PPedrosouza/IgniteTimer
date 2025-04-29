@@ -1,5 +1,11 @@
 import { createContext, ReactNode, useReducer, useState } from "react";
-import { ActionTypes, Cycle, cyclesReducer } from "../reducers/cycles";
+import {
+    ActionTypes,
+    addNewCycleAction,
+    interruptCurrentCycleAction,
+    markCurrentCycleAsFinishedAction
+} from "../reducers/cycles/actions";
+import { Cycle, cyclesReducer } from "../reducers/cycles/reducer";
 
 interface CreateCyleData {
     task: string;
@@ -24,11 +30,11 @@ interface CyclesContexProviderProps {
 }
 
 export function CyclesContextProvider({ children }: CyclesContexProviderProps) {
-    const [cyclesState, dispatch] = useReducer(cyclesReducer, 
-    {
-        cycles: [],
-        activeCycleId: null,
-    })
+    const [cyclesState, dispatch] = useReducer(cyclesReducer,
+        {
+            cycles: [],
+            activeCycleId: null,
+        })
 
     const [amountSecondsPassed, setAmountSecondsPassed] = useState(0);
     const { cycles, activeCycleId } = cyclesState
@@ -39,12 +45,7 @@ export function CyclesContextProvider({ children }: CyclesContexProviderProps) {
     }
 
     function markCurrentCycleAsFinished() {
-        dispatch({
-            type: ActionTypes.MARK_CURRENT_CYCLE_AD_FINISHED,
-            payload: {
-                activeCycleId,
-            },
-        })
+        dispatch(markCurrentCycleAsFinishedAction())
     }
 
     function createNewCycle(data: CreateCyleData) {
@@ -57,23 +58,13 @@ export function CyclesContextProvider({ children }: CyclesContexProviderProps) {
             startDate: new Date()
         }
 
-        dispatch({
-            type: ActionTypes.ADD_NEW_CYCLE,
-            payload: {
-                newCycle,
-            },
-        })
+        dispatch(addNewCycleAction(newCycle))
 
         setAmountSecondsPassed(0)
     }
 
     function interruptCurrentCycle() {
-        dispatch({
-            type: ActionTypes.INTERRUPT_CURRENT_CYCLE,
-            payload: {
-                activeCycleId,
-            },
-        })
+        dispatch(interruptCurrentCycleAction())
     }
 
     return (
