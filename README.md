@@ -29,6 +29,7 @@ This project was developed using the following technologies:
 
 - React
 - TypeScript
+- JavaScript
 - Styled Components
 - HTML
 - CSS
